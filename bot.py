@@ -56,9 +56,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
             InlineKeyboardButton(
-                "Kling 65 Credit",
-                callback_data="product:kling",
-                icon_custom_emoji_id=KLING_EMOJI_ID,
+    "Kling 65 Credit",
+    callback_data="product:kling",
+    icon_custom_emoji_id=KLING_EMOJI_ID,
             )
         ],
         [
