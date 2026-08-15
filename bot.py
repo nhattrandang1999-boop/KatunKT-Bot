@@ -224,13 +224,8 @@ async def health():
 async def start_bot():
     bot = Application.builder().token(BOT_TOKEN).build()
 
-    bot.add_handler(
-        CommandHandler("start", start)
-    )
-
-    bot.add_handler(
-        CommandHandler("products", products)
-    )
+    bot.add_handler(CommandHandler("start", start))
+    bot.add_handler(CommandHandler("products", products))
 
     bot.add_handler(
         CallbackQueryHandler(callback)
@@ -252,13 +247,20 @@ async def start_bot():
     if bot.post_init:
         await bot.post_init()
 
-        await bot.updater.start_polling()
+    # Xóa webhook cũ để chuyển sang polling
+    await bot.bot.delete_webhook(drop_pending_updates=True)
+
+    await bot.updater.start_polling(
+        drop_pending_updates=True
+    )
+
     await bot.start()
 
     print("🤖 TELEGRAM BOT ĐANG CHẠY...")
 
     try:
         await asyncio.Event().wait()
+
     finally:
         print("🛑 ĐANG DỪNG TELEGRAM BOT...")
 
@@ -269,9 +271,6 @@ async def start_bot():
             await bot.post_stop()
 
         await bot.shutdown()
-
-        await bot.shutdown()
-
 
 @app.on_event("startup")
 async def startup_event():
