@@ -1,6 +1,7 @@
 import os
 import threading
 import sqlite3
+import asyncio
 
 from fastapi import FastAPI
 from telegram import (
@@ -219,6 +220,28 @@ def home():
 def health():
     return {"status": "ok"}
 
+async def bot_polling(bot):
+    await bot.initialize()
+
+    if bot.post_init:
+        await bot.post_init()
+
+    await bot.updater.start_polling()
+    await bot.start()
+
+    try:
+        await asyncio.Event().wait()
+    finally:
+        await bot.updater.stop()
+        await bot.stop()
+
+        if bot.post_stop:
+            await bot.post_stop()
+
+        await bot.shutdown()
+
+        if bot.post_shutdown:
+            await bot.post_shutdown()
 
 def run_bot():
     bot = Application.builder().token(BOT_TOKEN).build()
@@ -241,19 +264,4 @@ def run_bot():
         )
     )
 
-    bot.run_polling()
-
-
-if __name__ == "__main__":
-    threading.Thread(
-        target=run_bot,
-        daemon=True
-    ).start()
-
-    import uvicorn
-
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=PORT
-)
+    asyncio.run(bot_polling(bot))
