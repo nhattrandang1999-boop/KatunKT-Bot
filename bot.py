@@ -217,37 +217,20 @@ def home():
 
 
 @app.get("/health")
-def health():
+async def health():
     return {"status": "ok"}
 
-async def bot_polling(bot):
-    await bot.initialize()
 
-    if bot.post_init:
-        await bot.post_init()
-
-    await bot.updater.start_polling()
-    await bot.start()
-
-    try:
-        await asyncio.Event().wait()
-    finally:
-        await bot.updater.stop()
-        await bot.stop()
-
-        if bot.post_stop:
-            await bot.post_stop()
-
-        await bot.shutdown()
-
-        if bot.post_shutdown:
-            await bot.post_shutdown()
-
-def run_bot():
+async def start_bot():
     bot = Application.builder().token(BOT_TOKEN).build()
 
-    bot.add_handler(CommandHandler("start", start))
-    bot.add_handler(CommandHandler("products", products))
+    bot.add_handler(
+        CommandHandler("start", start)
+    )
+
+    bot.add_handler(
+        CommandHandler("products", products)
+    )
 
     bot.add_handler(
         CallbackQueryHandler(callback)
@@ -264,4 +247,43 @@ def run_bot():
         )
     )
 
-    asyncio.run(bot_polling(bot))
+    await bot.initialize()
+
+    if bot.post_init:
+        await bot.post_init()
+
+    await bot.updater.start_polling()
+await bot.start()
+
+print("🤖 TELEGRAM BOT ĐANG CHẠY...")
+print("✅ POLLING TELEGRAM ĐÃ BẮT ĐẦU...")
+
+    try:
+        await asyncio.Event().wait()
+
+    finally:
+        print("🛑 ĐANG DỪNG TELEGRAM BOT...")
+
+        await bot.updater.stop()
+        await bot.stop()
+
+        if bot.post_stop:
+            await bot.post_stop()
+
+        await bot.shutdown()
+
+
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 ĐANG KHỞI ĐỘNG TELEGRAM BOT...")
+    asyncio.create_task(start_bot())
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=PORT
+    )
