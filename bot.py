@@ -252,15 +252,13 @@ async def start_bot():
     if bot.post_init:
         await bot.post_init()
 
-    await bot.updater.start_polling()
-await bot.start()
+        await bot.updater.start_polling()
+    await bot.start()
 
-print("🤖 TELEGRAM BOT ĐANG CHẠY...")
-print("✅ POLLING TELEGRAM ĐÃ BẮT ĐẦU...")
+    print("🤖 TELEGRAM BOT ĐANG CHẠY...")
 
     try:
         await asyncio.Event().wait()
-
     finally:
         print("🛑 ĐANG DỪNG TELEGRAM BOT...")
 
@@ -269,6 +267,8 @@ print("✅ POLLING TELEGRAM ĐÃ BẮT ĐẦU...")
 
         if bot.post_stop:
             await bot.post_stop()
+
+        await bot.shutdown()
 
         await bot.shutdown()
 
